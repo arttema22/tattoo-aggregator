@@ -1,0 +1,9 @@
+[
+    { "name": "Facebook", "alias": "fb", "url": "https://www.facebook.com/" },
+    { "name": "Instagram", "alias": "inst", "url": "https://www.instagram.com/" },
+    { "name": "YouTube", "alias": "youtube", "url": "https://www.youtube.com/c/" },
+    { "name": "Twitter", "alias": "tw", "url": "https://twitter.com/" },
+    { "name": "VK", "alias": "vk", "url": "https://vk.com/" },
+    { "name": "Telegram", "alias": "telegram", "url": "https://t.me/" },
+    { "name": "Яндекс Дзен", "alias": "zen", "url": "https://zen.yandex.ru/" }
+]

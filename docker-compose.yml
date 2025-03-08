@@ -1,0 +1,97 @@
+version: "3"
+services:
+
+    # App
+    tattoo_app:
+        build:
+            context: .
+            dockerfile: .docker/php/dev/Dockerfile
+        container_name: tattoo_app
+        volumes:
+            - "${PROJECT_ROOT}:/var/www"
+        networks:
+            - tattoo_network
+
+    # Workers
+    tattoo_worker:
+        build:
+            context: .
+            dockerfile: .docker/php/dev/Dockerfile
+        container_name: tattoo_worker
+        restart: unless-stopped
+        volumes:
+            - "${PROJECT_ROOT}:/var/www"
+        links:
+            - tattoo_db
+            - tattoo_redis
+            - tattoo_app
+        networks:
+            - tattoo_network
+        command: sh -c "php /var/www/artisan horizon"
+
+    # Cron
+    tattoo_scheduler:
+        build:
+            context: .
+            dockerfile: .docker/php/dev/Dockerfile
+        container_name: tattoo_scheduler
+        restart: unless-stopped
+        volumes:
+            - "${PROJECT_ROOT}:/var/www"
+        links:
+            - tattoo_db
+            - tattoo_redis
+            - tattoo_app
+        networks:
+            - tattoo_network
+        entrypoint: .docker/scheduler/start.sh
+
+    # DataBase
+    tattoo_db:
+        image: mariadb:10.5
+        container_name: tattoo_db
+        restart: unless-stopped
+        volumes:
+            - "${PROJECT_ROOT}/.docker/data/mysql:/var/lib/mysql"
+        environment:
+            - MYSQL_DATABASE=${DB_DATABASE}
+            - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+        networks:
+            - tattoo_network
+
+    # HTTP Server
+    tattoo_webserver:
+        build:
+            context: .
+            dockerfile: .docker/nginx/Dockerfile
+        container_name: tattoo_webserver
+        image: nginx:alpine
+        restart: unless-stopped
+        tty: true
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - "${PROJECT_ROOT}:/var/www"
+            - "${PROJECT_ROOT}/.docker/nginx/conf.d:/etc/nginx/conf.d"
+            - "${PROJECT_ROOT}/.docker/data/nginx:/var/log/nginx"
+        links:
+            - tattoo_app
+            - tattoo_db
+            - tattoo_redis
+        networks:
+            - tattoo_network
+
+    # Redis
+    tattoo_redis:
+        image: redis
+        container_name: tattoo_redis
+        volumes:
+            - "${PROJECT_ROOT}/.docker/data/redis:/data"
+        networks:
+            - tattoo_network
+
+# Docker Networks
+networks:
+    tattoo_network:
+        driver: bridge

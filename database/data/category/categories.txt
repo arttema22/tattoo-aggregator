@@ -1,0 +1,5 @@
+news;Новости
+experts;Эксперты
+tattoo;Тату
+tatuaje;Татуаж
+piercing;Пирсинг
